@@ -3,7 +3,10 @@
 on:
   push:
     branches:
-      - master 
+      - master
+
+permissions:
+  contents: write  # Ensure the token has write permissions to contents
 
 jobs:
   build_and_release:
@@ -12,7 +15,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        
+
       - name: Find APK
         id: find_apk
         run: |
