@@ -1,0 +1,33 @@
+﻿@using DnD_Companion_blazor.Models
+
+<MudGrid Spacing="2">
+    @foreach (var stat in Stats.GetStatProperties())
+    {
+        <MudItem xs="4">
+            <div class="flex items-center bg-gray-700 text-white rounded-full shadow-lg">
+                <!-- Left small circle -->
+                <div class="w-4 h-4 bg-gray-900 rounded-full m-2 border border-dashed" @onclick="@(() => SetSaveProficiency(stat))"></div>
+
+                <!-- Middle content -->
+                <div class="flex-grow bg-gray-800 rounded-l-full px-4 py-1 text-sm font-semibold text-center">
+                    STRENGTH
+                </div>
+
+                <!-- Right content (connected) -->
+                <div class="bg-gray-900 px-4 py-2 text-xl font-bold rounded-r-full">
+                    +0
+                </div>
+            </div>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    [Parameter] public Models.Stats Stats { get; set; } = new Models.Stats();
+
+    private void SetSaveProficiency(Stat stat)
+    {
+        stat.SaveProficiency = !stat.SaveProficiency;
+    }
+
+}
