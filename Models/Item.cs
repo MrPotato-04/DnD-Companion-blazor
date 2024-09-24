@@ -1,4 +1,4 @@
-﻿namespace DnD_Companion.Models;
+﻿namespace DnD_Companion_blazor.Models;
 
 public class Item
 {

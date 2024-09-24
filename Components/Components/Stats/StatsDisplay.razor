@@ -1,5 +1,23 @@
-﻿<h3>StatsDisplay</h3>
+﻿@using DnD_Companion_blazor.Models
+@using System.Reflection
+
+<MudGrid Spacing="2">
+    @foreach (var stat in Stats.GetStatProperties())
+    {
+        <MudItem xs="4">
+            <div class="font-bold text-white p-4 py-2 rounded-lg shadow-lg text-center border-slate-700 border border-4">
+                <h3 class="text-sm">@stat.Name</h3>
+                <div class="text-3xl my-2 p-2 py-0 border rounded">@stat.Stat.ModifierString</div>
+                <div
+                    class="text-xl text-center bg-gray-900 rounded-[100%] w-14 h-8 border-slate-700 border border-[3px] mx-auto flex justify-center items-center">
+                    @stat.Stat.Value
+                </div>
+            </div>
+        </MudItem>
+    }
+</MudGrid>
 
 @code {
-    
+    [Parameter] public Stats Stats { get; set; } = new Stats();
+
 }

@@ -1,17 +1,97 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@* Required *@
+<MudThemeProvider IsDarkMode="true" Theme="@_theme"/>
+<MudPopoverProvider/>
 
+@* Needed for dialogs *@
+<MudDialogProvider/>
+
+@* Needed for snackbars *@
+<MudSnackbarProvider/>
+
+<div class="page dark bg-slate-900 text-primary-dark">
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+        @Body
     </main>
 </div>
+
+@code {
+
+    private MudTheme _theme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#8B0000",
+            Secondary = "#2B2B2B",
+            Tertiary = "#FF4136",
+            Background = "#1C1C1E",
+            BackgroundGray = "#2B2B2B",
+            Surface = "#1A1A1A",
+            DrawerBackground = "#1A1A1A",
+            DrawerText = "#FFFFFF",
+            AppbarBackground = "#8B0000",
+            AppbarText = "#FFFFFF",
+            TextPrimary = "#FFFFFF",
+            TextSecondary = "#919191",
+            ActionDefault = "#ACACAC",
+            ActionDisabled = "#6E6E6E",
+            ActionDisabledBackground = "#404040",
+            Divider = "#404040",
+            DividerLight = "#6E6E6E",
+            TableLines = "#6E6E6E",
+            LinesDefault = "#6E6E6E",
+            LinesInputs = "#919191",
+            TextDisabled = "#6E6E6E"
+        },
+        // {
+        //     Primary = "#8B0000",
+        //     Secondary = "#2B2B2B",
+        //     Tertiary = "#FF4136",
+        //     Background = "#F5F5F5",
+        //     BackgroundGray = "#1C1C1E",
+        //     Surface = "#FFFFFF",
+        //     DrawerBackground = "#1C1C1E",
+        //     DrawerText = "#FFFFFF",
+        //     AppbarBackground = "#8B0000",
+        //     AppbarText = "#FFFFFF",
+        //     TextPrimary = "#000000",
+        //     TextSecondary = "#6E6E6E",
+        //     ActionDefault = "#6E6E6E",
+        //     ActionDisabled = "#404040",
+        //     ActionDisabledBackground = "#919191",
+        //     Divider = "#E1E1E1",
+        //     DividerLight = "#C8C8C8",
+        //     TableLines = "#ACACAC",
+        //     LinesDefault = "#919191",
+        //     LinesInputs = "#6E6E6E",
+        //     TextDisabled = "#404040"
+        // };
+
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "#8B0000",
+            Secondary = "#2B2B2B",
+            Tertiary = "#FF4136",
+            Background = "#1C1C1E",
+            BackgroundGray = "#2B2B2B",
+            Surface = "#1A1A1A",
+            DrawerBackground = "#1A1A1A",
+            DrawerText = "#FFFFFF",
+            AppbarBackground = "#8B0000",
+            AppbarText = "#FFFFFF",
+            TextPrimary = "#FFFFFF",
+            TextSecondary = "#919191",
+            ActionDefault = "#ACACAC",
+            ActionDisabled = "#6E6E6E",
+            ActionDisabledBackground = "#404040",
+            Divider = "#404040",
+            DividerLight = "#6E6E6E",
+            TableLines = "#6E6E6E",
+            LinesDefault = "#6E6E6E",
+            LinesInputs = "#919191",
+            TextDisabled = "#6E6E6E"
+        }
+    };
+
+}
