@@ -1,0 +1,30 @@
+﻿name: Release APK
+
+on:
+  push:
+    branches:
+      - master 
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Find APK
+        id: find_apk
+        run: |
+          APK_PATH=$(find ./bin/Debug/net8.0-android -name '*.apk' | head -n 1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.APK_PATH }}
+          tag_name: "prerelease-${{ github.run_number }}"
+          name: "Prerelease ${{ github.run_number }}"
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
