@@ -58,7 +58,7 @@
 
     @* Bottom Bar *@
     <div class="flex justify-between items-center w-full p-4 bg-slate-800/95 backdrop-blur-sm">
-        <PopupInput @ref="popupInputDamage" T="int?" Value="0" Immediate="false" ValueChanged="@(i => { Character?.TakeDamage(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Amount of damage">
+        <PopupInput @ref="popupInputDamage" T="int?" Value="0" Immediate="false" ValueChanged="@(i => { Character?.TakeDamage(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Take damage">
             <MudIconButton
                 Icon="@FAIcons.Swords"
                 Color="Color.Primary"
@@ -74,7 +74,7 @@
             Size="Size.Large"
             Class="rounded-full bg-slate-700 hover:bg-slate-600"
             OnClick="@(() => showDicePanel = !showDicePanel)"/>
-        <PopupInput @ref="popupInput" T="int?" Value="@(lastRoll?.Result)" Immediate="false" ValueChanged="@(i => { Character?.Heal(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal for.. (default last roll)">
+        <PopupInput @ref="popupInput" T="int?" Value="@(lastRoll?.Result)" Immediate="false" ValueChanged="@(i => { Character?.Heal(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal (default last roll)">
             <MudIconButton
                 Icon="@FAIcons.HealthCase"
                 Color="Color.Primary"
