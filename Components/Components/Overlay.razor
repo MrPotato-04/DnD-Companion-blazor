@@ -58,12 +58,6 @@
 
     @* Bottom Bar *@
     <div class="flex justify-between items-center w-full p-4 bg-slate-800/95 backdrop-blur-sm">
-        <MudIconButton
-            Icon="@FAIcons.Swords"
-            Color="Color.Primary"
-            Variant="Variant.Filled"
-            Size="Size.Large"
-            Class="rounded-full"/>
         <PopupInput @ref="popupInput" T="int?" Value="0" Immediate="false" ValueChanged="@(i => { Character?.TakeDamage(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal for.. (default last roll)">
             <MudIconButton
                 Icon="@FAIcons.Swords"
