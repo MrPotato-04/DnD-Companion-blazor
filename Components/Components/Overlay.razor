@@ -5,7 +5,7 @@
     @if (lastRoll != null && showDicePanel)
     {
         <div class="bg-slate-800/95 backdrop-blur-sm p-4 rounded-t-xl shadow-lg">
-            <p class="text-lg font-bold">
+            <p class="text-lg font-bold text-white">
                 @lastRoll.Type: @lastRoll.Result
                 @if (lastRoll.Advantage)
                 {
@@ -32,7 +32,7 @@
                         Color="Color.Primary"
                         Variant="Variant.Filled"
                         Class="bg-slate-700 hover:bg-slate-600 transition-colors p-3">
-                        <div class="text-sm mt-1">d@(dice.Sides)</div>
+                        <div class="text-sm mt-1 text-white">d@(dice.Sides)</div>
                     </MudIconButton>
                 }
             </div>
@@ -65,14 +65,14 @@
                 Variant="Variant.Filled"
                 Size="Size.Large"
                 OnClick="@popupInputDamage.TogglePopover"
-                Class="rounded-full"/>
+                Class="rounded-full bg-slate-700 hover:bg-slate-600"/>
         </PopupInput>
         <MudIconButton
             Icon="@FAIcons.DiceD20"
             Color="@(showDicePanel ? Color.Info : Color.Primary)"
             Variant="Variant.Filled"
             Size="Size.Large"
-            Class="rounded-full"
+            Class="rounded-full bg-slate-700 hover:bg-slate-600"
             OnClick="@(() => showDicePanel = !showDicePanel)"/>
         <PopupInput @ref="popupInput" T="int?" Value="@(lastRoll?.Result)" Immediate="false" ValueChanged="@(i => { Character?.Heal(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal for.. (default last roll)">
             <MudIconButton
@@ -81,19 +81,20 @@
                 Variant="Variant.Filled"
                 Size="Size.Large"
                 OnClick="@popupInput.TogglePopover"
-                Class="rounded-full"/>
+                Class="rounded-full bg-slate-700 hover:bg-slate-600"/>
         </PopupInput>
     </div>
 </div>
 
 @code {
+
+// Code section remains unchanged
     [Parameter] public Character? Character { get; set; }
     [Parameter] public EventCallback<Character> CharacterChanged { get; set; }
     [Parameter] public EventCallback<int> OnHeal { get; set; }
 
     private PopupInput<int?> popupInput = new();
     private PopupInput<int?> popupInputDamage = new();
-
 
     private bool showDicePanel;
     private bool advantage;
@@ -128,7 +129,7 @@
     {
         if (advantage && disadvantage)
         {
-            return; // Could show an error message here
+            return;
         }
 
         int result = sides switch
@@ -150,14 +151,6 @@
             Disadvantage = disadvantage
         };
         StateHasChanged();
-
-        // Optional: Add timer to clear the last roll after a few seconds
-        // InvokeAsync(async () =>
-        // {
-        //     await Task.Delay(3000);
-        //     lastRoll = null;
-        //     StateHasChanged();
-        // });
     }
 
 }
