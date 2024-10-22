@@ -1,24 +1,24 @@
 ﻿@using DnD_Companion_blazor.Models
 
-<MudGrid Spacing="2">
+<MudGrid Spacing="2" Class="mt-2">
     <MudItem xs="12">
         <h2 class="text-xl font-bold text-white">Saving Throws</h2>
     </MudItem>
     @foreach (var stat in Stats.GetStatProperties())
     {
         <MudItem xs="6">
-            <div class="flex items-center space-x-2 p-1 bg-gray-800 rounded-full shadow-lg transition-all duration-300">
+            <div class="flex items-center space-x-2 p-1 bg-black rounded-full shadow-lg transition-all duration-300 border border-1 border-gray-600">
                 <!-- Proficiency indicator -->
-                <div class="w-6 h-6 flex items-center justify-center rounded-full border border-white transition-all duration-300 @(stat.Stat.SaveProficiency ? "bg-white" : "bg-gray-600 border-dashed")" @onclick="@(() => SetSaveProficiency(stat.Stat))">
+                <div class="w-6 h-6 flex items-center justify-center rounded-full border border-white transition-all duration-300 @(stat.Stat.SaveProficiency ? "bg-gray-100" : "bg-gray-600 border-dashed")" @onclick="@(() => SetSaveProficiency(stat.Stat))">
                 </div>
 
                 <!-- Stat name -->
-                <div class="flex-grow text-sm font-medium text-gray-300">
+                <div class="flex-grow text-sm font-medium text-white">
                     @stat.Name
                 </div>
 
                 <!-- Saving throw value -->
-                <div class="bg-gray-700 px-3 py-1 rounded-full text-white font-semibold transition-all duration-300 hover:bg-primary">
+                <div class="bg-primary-light border-gray-600 px-3 py-1 rounded-full text-white font-semibold transition-all duration-300 hover:bg-primary">
                     @stat.Stat.GetSavingThrow(Stats.ProficiencyBonus)
                 </div>
             </div>
@@ -27,12 +27,28 @@
 </MudGrid>
 
 @code {
-    [Parameter] public Stats Stats { get; set; } = new Stats();
+    private Stats _stats = new Stats();
+
+    [Parameter]
+    public Stats Stats
+    {
+        get => _stats;
+        set
+        {
+            if (_stats != value)
+            {
+                _stats = value;
+                StatsChanged.InvokeAsync(_stats);
+            }
+        }
+    }
+
+    [Parameter] public EventCallback<Stats> StatsChanged { get; set; }
 
     private void SetSaveProficiency(Stat stat)
     {
         stat.SaveProficiency = !stat.SaveProficiency;
-        StateHasChanged();
+        StatsChanged.InvokeAsync(_stats);
     }
 
 }

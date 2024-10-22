@@ -1,35 +1,78 @@
-﻿namespace DnD_Companion_blazor.Models;
+﻿using System.Text.Json;
 
+namespace DnD_Companion_blazor.Models;
+
+[JsonSerializable(typeof(Character))]
 public class Character
 {
-    public string Name { get; set; } = null!;
-    public string Race { get; set; } = null!;
-    public string Class { get; set; } = null!;
-    public int Level { get; set; } = 1;
-    public string Background { get; set; } = null!;
-    public string Alignment { get; set; } = null!;
-    public int ExperiencePoints { get; set; } = 0;
-    public Stats Stats { get; set; } = new Stats();
-    public int ArmorClass { get; set; } = 0;
-    public int Initiative => Stats.Dexterity.Modifier;
-    public int Speed { get; set; } = 0;
-    public int MaxHitPoints { get; set; } = 0;
-    public int CurrentHitPoints { get; set; }
-    public int TemporaryHitPoints { get; set; }
-    public double HitPointPercentage => (double)CurrentHitPoints / MaxHitPoints;
-    public List<string> HitDice { get; set; } = new List<string>();
-    public List<Skill> Skills { get; set; } = new List<Skill>();
-    public List<string> Proficiencies { get; set; } = new List<string>();
-    public List<string> Languages { get; set; } = new List<string>();
-    public List<Item> Equipment { get; set; } = new List<Item>();
+    [JsonPropertyName("name")] public string Name { get; set; } = null!;
 
+    [JsonPropertyName("race")] public string Race { get; set; } = null!;
+
+    [JsonPropertyName("class")] public string Class { get; set; } = null!;
+
+    [JsonPropertyName("level")] public int Level { get; set; } = 1;
+
+    [JsonPropertyName("background")] public string Background { get; set; } = null!;
+
+    [JsonPropertyName("alignment")] public string Alignment { get; set; } = null!;
+
+    [JsonPropertyName("experience_points")]
+    public int ExperiencePoints { get; set; } = 0;
+
+    [JsonPropertyName("stats")] public Stats Stats { get; set; } = new Stats();
+
+    [JsonPropertyName("armor_class")] public int ArmorClass { get; set; } = 0;
+
+    // No need to serialize computed properties
+    public int Initiative() => Stats.Dexterity.Modifier;
+
+    [JsonPropertyName("speed")] public int Speed { get; set; } = 0;
+
+    [JsonPropertyName("max_hit_points")] public int MaxHitPoints { get; set; } = 0;
+
+    [JsonPropertyName("current_hit_points")]
+    public int CurrentHitPoints { get; set; }
+
+    [JsonPropertyName("temporary_hit_points")]
+    public int TemporaryHitPoints { get; set; }
+
+    [JsonIgnore] // Computed properties are typically not serialized
+    public double HitPointPercentage => (double)CurrentHitPoints / MaxHitPoints;
+
+    [JsonPropertyName("hit_dice")] public List<string> HitDice { get; set; } = new List<string>();
+
+    [JsonPropertyName("skills")] public List<Skill> Skills { get; set; } = new List<Skill>();
+
+    [JsonPropertyName("proficiencies")] public List<string> Proficiencies { get; set; } = new List<string>();
+
+    [JsonPropertyName("languages")] public List<string> Languages { get; set; } = new List<string>();
+
+    [JsonPropertyName("equipment")] public List<Item> Equipment { get; set; } = new List<Item>();
+
+    public string Inventory { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the additional notes or comments for the character. This can include background information, story elements, or any other relevant details that the player or game master wishes to keep track of.,
+    /// Perhaps even special story related items or events.
+    /// </summary>
+    public string Notes { get; set; } = string.Empty;
+
+    [JsonPropertyName("currency")]
     public Dictionary<string, int> Currency { get; set; } = new Dictionary<string, int>
     {
         { "CP", 0 }, { "SP", 0 }, { "EP", 0 }, { "GP", 0 }, { "PP", 0 }
     };
 
-    public List<Feature> Features { get; set; } = new List<Feature>();
-    public List<Spell> Spells { get; set; } = new List<Spell>();
+    [JsonPropertyName("features")] public List<Feature> Features { get; set; } = new List<Feature>();
+
+    [JsonPropertyName("spells")] public List<Spell> Spells { get; set; } = new List<Spell>();
+
+    public Character()
+    {
+        Stats = new Stats();
+        InitializeSkills();
+    }
 
     public Character(Stats stats)
     {
@@ -104,5 +147,24 @@ public class Character
         CurrentHitPoints += amount;
         if (CurrentHitPoints > MaxHitPoints)
             CurrentHitPoints = MaxHitPoints;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+
+        var other = (Character)obj;
+
+        var thisJson = JsonSerializer.Serialize(this);
+
+        var otherJson = JsonSerializer.Serialize(other);
+
+        return thisJson == otherJson;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Race, Class, Level, Background, Alignment, ExperiencePoints, Stats);
     }
 }

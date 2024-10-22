@@ -6,6 +6,8 @@ module.exports = {
         extend: {
             backgroundColor: {
                 primary: '#1C1C1E',
+                'primary-light': '#2B2B2B',
+                'primary-darker': '#141414',
             },
             textColor: {
                 'primary-light': '#000000',
@@ -15,6 +17,8 @@ module.exports = {
             },
             colors: {
                 primary: '#8B0000',
+                'primary-light': '#FF0000',
+                'primary-darker': '#6E0000',
                 secondary: '#2B2B2B',
                 tertiary: '#FF4136',
                 'accent-light': '#FFD700',

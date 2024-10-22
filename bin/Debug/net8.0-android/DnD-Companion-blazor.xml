@@ -4,5 +4,11 @@
         <name>DnD-Companion-blazor</name>
     </assembly>
     <members>
+        <member name="P:DnD_Companion_blazor.Models.Character.Notes">
+            <summary>
+            Gets or sets the additional notes or comments for the character. This can include background information, story elements, or any other relevant details that the player or game master wishes to keep track of.,
+            Perhaps even special story related items or events.
+            </summary>
+        </member>
     </members>
 </doc>

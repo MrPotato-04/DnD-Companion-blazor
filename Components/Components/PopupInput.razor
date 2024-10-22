@@ -1,0 +1,44 @@
+﻿@using MudBlazor
+@typeparam T
+
+<div class="@Class" @onclick="TogglePopover">
+    @ChildContent
+</div>
+
+<MudDialog DefaultFocus="DefaultFocus.LastChild" Visible="@IsOpen" Options="@(new DialogOptions() { BackdropClick = true, FullScreen = false, MaxWidth = MaxWidth.Small, CloseButton = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h5">@Label</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudPaper Elevation="0" Width="100%" Class="pa-4">
+            <MudInput T="T" Value="Value" FullWidth="true" ValueChanged="@(Change)" Immediate="@Immediate" InputType="@InputType"/>
+        </MudPaper>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool Immediate { get; set; } = true;
+
+    [Parameter] public string Class { get; set; } = "";
+    [Parameter] public T Value { get; set; }
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+    [Parameter] public InputType InputType { get; set; } = InputType.Text;
+    [Parameter] public string Label { get; set; } = "Enter value";
+
+    private bool IsOpen { get; set; } = false;
+
+    public async void TogglePopover()
+    {
+        IsOpen = !IsOpen;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Change(T obj)
+    {
+        Value = obj;
+        ValueChanged.InvokeAsync(obj);
+    }
+
+}

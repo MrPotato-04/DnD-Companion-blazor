@@ -1,106 +1,220 @@
 ﻿@page "/"
+@using System.Diagnostics
+@using System.Text.Json
 @using DnD_Companion_blazor.Models
 @using DnD_Companion_blazor.Components.Components.Stats
+@using DnD_Companion_blazor.Helpers
+@using DnD_Companion_blazor.Components.Components
 
+@if (Character is not null)
+{
+    <div class="min-h-screen flex flex-col gap-4 justify-start" style="margin-bottom: 70px">
+        <div class="flex flex-col w-full justify-center items-center bg-primary-light py-2 gap-2">
+            <div class="flex w-full flex-row justify-around items-center">
+                <div class="flex flex-col">
+                    <PopupInput T="string" @bind-Value="Character.Name" Label="Character Name" InputType="InputType.Text">
+                        <h3 class="text-2xl text-white font-bold">@Character.Name</h3>
+                    </PopupInput>
+                    <div class="flex flex-row gap-1">
+                        <PopupInput T="string" @bind-Value="Character.Class" Label="Class" InputType="InputType.Text">
+                            <p class="text-lg text-gray-300">@Character.Class</p>
+                        </PopupInput>
+                        <PopupInput T="int" @bind-Value="Character.Level" Label="Level" InputType="InputType.Number">
+                            <p class="text-lg text-gray-300">Lvl: @Character.Level</p>
+                        </PopupInput>
+                    </div>
+                </div>
 
-<div class="min-h-screen flex flex-col gap-2 justify-start">
-    <div class="flex flex-col w-full justify-center items-center bg-slate-700 py-2 gap-2">
-        <div class="flex w-full flex-row justify-around items-center">
-            <div>
-                <h3 class="text-2xl text-white font-bold">@character.Name</h3>
-                <p class="text-lg text-gray-300">@character.Class</p>
+                @* hp *@
+                <div class="flex flex-col items-center">
+                    <h3 class="text-2xl text-white font-bold">HP</h3>
+                    <div class="text-xl text-gray-300 flex flex-row">
+                        <PopupInput T="int" @bind-Value="Character.CurrentHitPoints" Label="Current Hit Points" InputType="InputType.Number">
+                            <span>@Character.CurrentHitPoints</span>
+                        </PopupInput>
+                        /
+                        <PopupInput T="int" @bind-Value="Character.MaxHitPoints" Label="Max Hit Points" InputType="InputType.Number">
+                            <span>@Character.MaxHitPoints</span>
+                        </PopupInput>
+                    </div>
+                    <MudProgressLinear Color="Color.Primary" Value="@(Character.HitPointPercentage * 100)"/>
+                </div>
             </div>
+            <div class="flex w-full justify-around">
+                @* proficieny bonus *@
+                <PopupInput T="int" @bind-Value="Character.Stats.ProficiencyBonus" Label="Proficiency Bonus" InputType="InputType.Number" Class="flex flex-col items-center ">
+                    <div class="text-lg text-white">@Character.Stats.ProficiencyBonus</div>
+                    <h3 class="text-sm  text-gray-300 font-bold">Prof. Bonus</h3>
+                </PopupInput>
+                <PopupInput T="int" @bind-Value="Character.Speed" Label="Speed" InputType="InputType.Number" Class="flex flex-col items-center ">
+                    <div class="text-lg text-white">@Character.Speed</div>
+                    <h3 class="text-sm text-gray-300 font-bold">Speed</h3>
+                </PopupInput>
+                <div class="flex flex-col items-center ">
+                    <div class="text-lg text-white">@Character.Initiative()</div>
+                    <h3 class="text-sm  text-gray-300 font-bold">Initiative</h3>
+                </div>
 
-            @* hp *@
-            <div class="flex flex-col items-center">
-                <h3 class="text-2xl text-white font-bold">HP</h3>
-                <div class="text-xl text-gray-300">@character.CurrentHitPoints/@character.MaxHitPoints</div>
-                <MudProgressLinear Color="Color.Primary" Value="@(character.HitPointPercentage * 100)"/>
+                <PopupInput T="int" @bind-Value="Character.ArmorClass" Label="Armor Class" InputType="InputType.Number" Class="flex flex-col items-center ">
+                    <div class="text-lg text-white">@Character.ArmorClass</div>
+                    <h3 class="text-sm  text-gray-300 font-bold">Armor class</h3>
+                </PopupInput>
             </div>
         </div>
-        <div class="flex w-full justify-around">
-            @* proficieny bonus *@
-            <div class="flex flex-col items-center ">
-                <div class="text-lg text-white">@character.Stats.ProficiencyBonus</div>
-                <h3 class="text-sm  text-gray-300 font-bold">Prof. Bonus</h3>
+        <div class="p-2">
+            <StatsDisplay @bind-Stats="Character.Stats"/>
+            <SavingThrows @bind-Stats="Character.Stats"/>
+
+            <div class="flex flex-col gap-4 py-2 justify-start">
+                <MudTextField T="string" Label="Inventory" Variant="Variant.Text" Text="@Character.Inventory" Immediate @bind-Value="Character.Inventory" Lines="5" AutoGrow/>
+                <MudTextField T="string" Label="Notes" Variant="Variant.Text" Text="@Character.Notes" Immediate @bind-Value="Character.Inventory" Lines="5" AutoGrow/>
             </div>
-            <div class="flex flex-col items-center ">
-                <div class="text-lg text-white">@character.Speed</div>
-                <h3 class="text-sm tex text-gray-300 font-bold">Speed</h3>
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold text-white">Skills</h2>
+
+                <MudGrid>
+                    @foreach (var skill in Character.Skills)
+                    {
+                        <MudItem xs="4">
+                            @* <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 @(skill.Proficient ? "border-2 border-primary" : "")"> *@
+                            @*     <span>@skill.Name</span> *@
+                            @*     <span class="text-start">@Character.GetSkillModifier(skill.Name)</span> *@
+                            @* </MudPaper> *@
+
+                            <div style="height: 100px" class="font-bold flex flex-col justify-between text-white p-4 py-2 rounded-lg shadow-lg text-center border-primary border border-4  @(skill.Proficient ? "bg-slate-700" : "")" @onclick="@(() => { skill.Proficient = !skill.Proficient; StateHasChanged(); })">
+                                <h3 class="text-sm">@skill.Name</h3>
+                                <div
+                                    class="text-xl text-center bg-gray-900 rounded-[100%] w-14 h-8 border-primary border border-[3px] mx-auto flex justify-center items-center">
+                                    @Character.GetSkillModifier(skill.Name)
+                                </div>
+                            </div>
+                        </MudItem>
+                    }
+                </MudGrid>
             </div>
-            <div class="flex flex-col items-center ">
-                <div class="text-lg text-white">@character.Initiative</div>
-                <h3 class="text-sm  text-gray-300 font-bold">Initiative</h3>
-            </div>
-            <div class="flex flex-col items-center ">
-                <div class="text-lg text-white">@character.ArmorClass</div>
-                <h3 class="text-sm  text-gray-300 font-bold">Armor class</h3>
-            </div>
+
         </div>
     </div>
-    <div class="p-2">
-        <StatsDisplay Stats="@character.Stats"/>
-        <SavingThrows Stats="@character.Stats"/>
-
-        <div class="flex flex-col">
-            <h2 class="text-xl font-bold text-white">Skills</h2>
-            <table class="w-full text-white">
-                <thead>
-                <tr>
-                    <th class="text-center">Prof.</th>
-                    <th class="text-left">Skill</th>
-                    <th class="text-center">Bonus</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var skill in character.Skills)
-                {
-                    <tr>
-                        <td class="text-center">@skill.Proficient</td>
-                        <td>@skill.Name</td>
-                        <td class="text-center">@character.GetSkillModifier(skill.Name)</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
+}
+else
+{
+    <div class="min-h-screen flex flex-col justify-center items-center">
+        <MudProgressCircular Size="MudBlazor.Size.Large" Color="Color.Primary" Indeterminate="true"/>
     </div>
-</div>
+}
+
+@if (OutOfSync)
+{
+    <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Class="fixed top-2 right-2" OnClick="@SaveCharacter"/>
+}
+
+<Overlay OnHeal="@(i => Character?.Heal(i))" @bind-Character="Character"/>
+
 
 @code {
 
-    private Character character = new Character(new Stats()
+    protected override async Task OnInitializedAsync()
     {
-        Strength = new Stat(10),
-        Dexterity = new Stat(12),
-        Constitution = new Stat(14),
-        Intelligence = new Stat(16)
+        Character = await DataManager.LoadData<Character>("character") ?? new Character(new Stats()
         {
-            SaveProficiency = true
-        },
-        Wisdom = new Stat(18)
+            Strength = new Stat(10),
+            Dexterity = new Stat(12),
+            Constitution = new Stat(14),
+            Intelligence = new Stat(16)
+            {
+                SaveProficiency = true
+            },
+            Wisdom = new Stat(18)
+            {
+                SaveProficiency = true
+            },
+            Charisma = new Stat(20)
+        })
         {
-            SaveProficiency = true
-        },
-        Charisma = new Stat(20)
-    })
+            Name = "Gandalf",
+            Class = "Wizard",
+            MaxHitPoints = 20,
+            CurrentHitPoints = 15,
+        };
+
+        _savedCharacter = JsonSerializer.Deserialize<Character>(JsonSerializer.Serialize(Character));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Name = "Gandalf",
-        Class = "Wizard",
-        MaxHitPoints = 20,
-        CurrentHitPoints = 15,
-    };
+        if (firstRender)
+        {
+            _ = CheckForChanges();
+        }
+    }
+
+    private async Task SaveCharacter()
+    {
+        DataManager.SaveData("character", Character).GetAwaiter().GetResult();
+        _savedCharacter = JsonSerializer.Deserialize<Character>(JsonSerializer.Serialize(Character));
+        OutOfSync = false;
+    }
+
+    private Character? _savedCharacter = null;
+
+    private Character? Character { get; set; } = null;
+
+    private async Task CheckForChanges()
+    {
+        // loop interval 10sec
+        while (true)
+        {
+            if (Character is not null && _savedCharacter?.Equals(Character) == false)
+            {
+                Debug.WriteLine("Character has changed");
+                OutOfSync = true;
+            }
+            else
+            {
+                Debug.WriteLine("Character is in sync");
+                OutOfSync = false;
+            }
+
+            StateHasChanged();
+
+            await Task.Delay(100);
+        }
+    }
+
+    private bool OutOfSync { get; set; } = false;
+
+    // ?? new Character(new Stats()
+    // {
+    //     Strength = new Stat(10),
+    //     Dexterity = new Stat(12),
+    //     Constitution = new Stat(14),
+    //     Intelligence = new Stat(16)
+    //     {
+    //         SaveProficiency = true
+    //     },
+    //     Wisdom = new Stat(18)
+    //     {
+    //         SaveProficiency = true
+    //     },
+    //     Charisma = new Stat(20)
+    // })
+    // {
+    //     Name = "Gandalf",
+    //     Class = "Wizard",
+    //     MaxHitPoints = 20,
+    //     CurrentHitPoints = 15,
+    // };;
 
     private Stat GetAbility(string abilityName)
     {
         return abilityName switch
         {
-            "Strength" => character.Stats.Strength,
-            "Dexterity" => character.Stats.Dexterity,
-            "Constitution" => character.Stats.Constitution,
-            "Intelligence" => character.Stats.Intelligence,
-            "Wisdom" => character.Stats.Wisdom,
-            "Charisma" => character.Stats.Charisma,
+            "Strength" => Character.Stats.Strength,
+            "Dexterity" => Character.Stats.Dexterity,
+            "Constitution" => Character.Stats.Constitution,
+            "Intelligence" => Character.Stats.Intelligence,
+            "Wisdom" => Character.Stats.Wisdom,
+            "Charisma" => Character.Stats.Charisma,
             _ => throw new ArgumentException("Invalid ability name")
         };
     }
@@ -109,12 +223,12 @@
     {
         int modifier = abilityName switch
         {
-            "Strength" => character.Stats.Strength.Modifier,
-            "Dexterity" => character.Stats.Dexterity.Modifier,
-            "Constitution" => character.Stats.Constitution.Modifier,
-            "Intelligence" => character.Stats.Intelligence.Modifier,
-            "Wisdom" => character.Stats.Wisdom.Modifier,
-            "Charisma" => character.Stats.Charisma.Modifier,
+            "Strength" => Character.Stats.Strength.Modifier,
+            "Dexterity" => Character.Stats.Dexterity.Modifier,
+            "Constitution" => Character.Stats.Constitution.Modifier,
+            "Intelligence" => Character.Stats.Intelligence.Modifier,
+            "Wisdom" => Character.Stats.Wisdom.Modifier,
+            "Charisma" => Character.Stats.Charisma.Modifier,
             _ => 0
         };
         return modifier >= 0 ? $"+{modifier}" : modifier.ToString();

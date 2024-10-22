@@ -1,0 +1,169 @@
+﻿@using DnD_Companion_blazor.Helpers
+@using DnD_Companion_blazor.Models
+<div class="fixed bottom-0 right-0 w-full z-40">
+    @* Result Toast *@
+    @if (lastRoll != null && showDicePanel)
+    {
+        <div class="bg-slate-800/95 backdrop-blur-sm p-4 rounded-t-xl shadow-lg">
+            <p class="text-lg font-bold">
+                @lastRoll.Type: @lastRoll.Result
+                @if (lastRoll.Advantage)
+                {
+                    <span> (Advantage)</span>
+                }
+                @if (lastRoll.Disadvantage)
+                {
+                    <span> (Disadvantage)</span>
+                }
+            </p>
+        </div>
+    }
+
+    @* Dice Panel *@
+    @if (showDicePanel)
+    {
+        <div class="bg-slate-800/95 backdrop-blur-sm p-4 shadow-lg @(lastRoll != null ? "" : "rounded-t-xl ")">
+            <div class="flex flex-wrap justify-center gap-4 mb-4">
+                @foreach (var dice in diceTypes)
+                {
+                    <MudIconButton
+                        Icon="@dice.Icon"
+                        OnClick="@(() => HandleRoll(dice.Sides))"
+                        Color="Color.Primary"
+                        Variant="Variant.Filled"
+                        Class="bg-slate-700 hover:bg-slate-600 transition-colors p-3">
+                        <div class="text-sm mt-1">d@(dice.Sides)</div>
+                    </MudIconButton>
+                }
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <MudButton
+                    OnClick="@(() => advantage = !advantage)"
+                    Color="@(advantage ? Color.Success : Color.Default)"
+                    Variant="Variant.Filled"
+                    Class="px-4 py-2">
+                    Advantage
+                </MudButton>
+                <MudButton
+                    OnClick="@(() => disadvantage = !disadvantage)"
+                    Color="@(disadvantage ? Color.Error : Color.Default)"
+                    Variant="Variant.Filled"
+                    Class="px-4 py-2">
+                    Disadvantage
+                </MudButton>
+            </div>
+        </div>
+    }
+
+    @* Bottom Bar *@
+    <div class="flex justify-between items-center w-full p-4 bg-slate-800/95 backdrop-blur-sm">
+        <MudIconButton
+            Icon="@FAIcons.Swords"
+            Color="Color.Primary"
+            Variant="Variant.Filled"
+            Size="Size.Large"
+            Class="rounded-full"/>
+        <PopupInput @ref="popupInput" T="int?" Value="0" Immediate="false" ValueChanged="@(i => { Character?.TakeDamage(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal for.. (default last roll)">
+            <MudIconButton
+                Icon="@FAIcons.Swords"
+                Color="Color.Primary"
+                Variant="Variant.Filled"
+                Size="Size.Large"
+                OnClick="@popupInputDamage.TogglePopover"
+                Class="rounded-full"/>
+        </PopupInput>
+        <MudIconButton
+            Icon="@FAIcons.DiceD20"
+            Color="@(showDicePanel ? Color.Info : Color.Primary)"
+            Variant="Variant.Filled"
+            Size="Size.Large"
+            Class="rounded-full"
+            OnClick="@(() => showDicePanel = !showDicePanel)"/>
+        <PopupInput @ref="popupInput" T="int?" Value="@(lastRoll?.Result)" Immediate="false" ValueChanged="@(i => { Character?.Heal(i ?? 0); CharacterChanged.InvokeAsync(Character); })" InputType="InputType.Number" Label="Heal for.. (default last roll)">
+            <MudIconButton
+                Icon="@FAIcons.HealthCase"
+                Color="Color.Primary"
+                Variant="Variant.Filled"
+                Size="Size.Large"
+                OnClick="@popupInput.TogglePopover"
+                Class="rounded-full"/>
+        </PopupInput>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Character? Character { get; set; }
+    [Parameter] public EventCallback<Character> CharacterChanged { get; set; }
+    [Parameter] public EventCallback<int> OnHeal { get; set; }
+
+    private PopupInput<int?> popupInput = new();
+    private PopupInput<int?> popupInputDamage = new();
+
+
+    private bool showDicePanel;
+    private bool advantage;
+    private bool disadvantage;
+    private RollResult? lastRoll;
+
+    private class DiceType
+    {
+        public string Icon { get; set; }
+        public int Sides { get; set; }
+    }
+
+    private class RollResult
+    {
+        public string Type { get; set; }
+        public int Result { get; set; }
+        public bool Advantage { get; set; }
+        public bool Disadvantage { get; set; }
+    }
+
+    private List<DiceType> diceTypes = new()
+    {
+        new DiceType { Sides = 4, Icon = FAIcons.DiceD4 },
+        new DiceType { Sides = 6, Icon = FAIcons.DiceD6 },
+        new DiceType { Sides = 8, Icon = FAIcons.DiceD8 },
+        new DiceType { Sides = 10, Icon = FAIcons.DiceD10 },
+        new DiceType { Sides = 12, Icon = FAIcons.DiceD12 },
+        new DiceType { Sides = 20, Icon = FAIcons.DiceD20 }
+    };
+
+    private void HandleRoll(int sides)
+    {
+        if (advantage && disadvantage)
+        {
+            return; // Could show an error message here
+        }
+
+        int result = sides switch
+        {
+            4 => DiceRoller.RollD4(advantage, disadvantage),
+            6 => DiceRoller.RollD6(advantage, disadvantage),
+            8 => DiceRoller.RollD8(advantage, disadvantage),
+            10 => DiceRoller.RollD10(advantage, disadvantage),
+            12 => DiceRoller.RollD12(advantage, disadvantage),
+            20 => DiceRoller.RollD20(advantage, disadvantage),
+            _ => throw new ArgumentException("Invalid dice type")
+        };
+
+        lastRoll = new RollResult
+        {
+            Type = $"d{sides}",
+            Result = result,
+            Advantage = advantage,
+            Disadvantage = disadvantage
+        };
+        StateHasChanged();
+
+        // Optional: Add timer to clear the last roll after a few seconds
+        // InvokeAsync(async () =>
+        // {
+        //     await Task.Delay(3000);
+        //     lastRoll = null;
+        //     StateHasChanged();
+        // });
+    }
+
+}
